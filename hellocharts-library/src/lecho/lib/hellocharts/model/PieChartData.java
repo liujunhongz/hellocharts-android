@@ -37,6 +37,7 @@ public class PieChartData extends AbstractChartData {
     private String centerText2;
 
     private List<SliceValue> values = new ArrayList<SliceValue>();
+    private boolean isPercentLabel = true;
 
     public PieChartData() {
         setAxisXBottom(null);
@@ -295,6 +296,15 @@ public class PieChartData extends AbstractChartData {
         if (null != formatter) {
             this.formatter = formatter;
         }
+        return this;
+    }
+
+    public boolean isPercentLabel() {
+        return isPercentLabel;
+    }
+
+    public PieChartData setPercentLabel(boolean isPercentLabel) {
+        this.isPercentLabel = isPercentLabel;
         return this;
     }
 }

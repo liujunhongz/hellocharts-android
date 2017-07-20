@@ -13,6 +13,9 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
+import android.util.Log;
+
+import java.util.Locale;
 
 import lecho.lib.hellocharts.formatter.PieChartValueFormatter;
 import lecho.lib.hellocharts.model.PieChartData;
@@ -23,6 +26,8 @@ import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.provider.PieChartDataProvider;
 import lecho.lib.hellocharts.util.ChartUtils;
 import lecho.lib.hellocharts.view.Chart;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Default renderer for PieChart. PieChart doesn't use viewport concept so it a little different than others chart
@@ -61,6 +66,7 @@ public class PieChartRenderer extends AbstractChartRenderer {
 
     private boolean hasLabelsOutside;
     private boolean hasLabels;
+    private boolean isPercentLabel;
     private boolean hasLabelsOnlyForSelected;
     private PieChartValueFormatter valueFormatter;
     private Viewport tempMaximumViewport = new Viewport();
@@ -110,6 +116,7 @@ public class PieChartRenderer extends AbstractChartRenderer {
         final PieChartData data = dataProvider.getPieChartData();
         hasLabelsOutside = data.hasLabelsOutside();
         hasLabels = data.hasLabels();
+        isPercentLabel = data.isPercentLabel();
         hasLabelsOnlyForSelected = data.hasLabelsOnlyForSelected();
         valueFormatter = data.getFormatter();
         hasCenterCircle = data.hasCenterCircle();
@@ -335,8 +342,19 @@ public class PieChartRenderer extends AbstractChartRenderer {
         sliceVector.set((float) (Math.cos(Math.toRadians(lastAngle + angle / 2))),
                 (float) (Math.sin(Math.toRadians(lastAngle + angle / 2))));
         normalizeVector(sliceVector);
-
-        final int numChars = valueFormatter.formatChartValue(labelBuffer, sliceValue);
+        final int numChars;
+        if (isPercentLabel) {
+            char[] label = String.format(Locale.getDefault(), "%.2f%", 100.0f * sliceValue.getValue() / maxSum).toCharArray();
+            int labelLength = label.length;
+            if (labelLength > labelBuffer.length) {
+                Log.w(TAG, "Label length is larger than buffer size(64chars), some chars will be skipped!");
+                labelLength = labelBuffer.length;
+            }
+            System.arraycopy(label, 0, labelBuffer, labelBuffer.length - labelLength, labelLength);
+            numChars = labelLength;
+        } else {
+            numChars = valueFormatter.formatChartValue(labelBuffer, sliceValue);
+        }
 
         if (numChars == 0) {
             // No need to draw empty label

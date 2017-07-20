@@ -41,7 +41,7 @@ public class PieChartActivity extends ActionBarActivity {
         private PieChartView chart;
         private PieChartData data;
 
-        private boolean hasLabels = false;
+        private boolean hasLabels = true;
         private boolean hasLabelsOutside = false;
         private boolean hasCenterCircle = false;
         private boolean hasCenterText1 = false;
@@ -155,7 +155,9 @@ public class PieChartActivity extends ActionBarActivity {
 
             List<SliceValue> values = new ArrayList<SliceValue>();
             for (int i = 0; i < numValues; ++i) {
-                SliceValue sliceValue = new SliceValue((float) Math.random() * 30 + 15, ChartUtils.pickColor());
+                float value = (float) Math.random() * 30 + 15;
+                SliceValue sliceValue = new SliceValue(value, ChartUtils.pickColor());
+//                sliceValue.setLabel(value + "%");
                 values.add(sliceValue);
             }
 

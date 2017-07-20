@@ -1,0 +1,60 @@
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from android.sourceSets.main.java.source
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+//    archives file("lycamplus-android-ijkplayer-${VERSION_NAME}.aar")
+}
+
+//task(releaseJar) << {
+    // Empty. We'll add dependencies for this task below
+//}
+task releaseJar {
+    doLast {
+    }
+}
+// Generate jar creation tasks for all build variants
+android.libraryVariants.all { variant ->
+    String makeJar = "makeJar${variant.name.capitalize()}"
+//    String signJar = "signJar${variant.name.capitalize()}"
+    // Create a jar by extracting it from the assembled .aar
+    // This ensures that products distributed via .aar and .jar exactly the same bits
+    project.task(makeJar, type: Copy) {
+        String archiveName = "${project.name}-${variant.name}"
+        String outputDir = "${buildDir.getPath()}/outputs"
+        // 删除
+        delete "${outputDir}/jar/"
+        dependsOn "assemble${variant.name.capitalize()}"
+        from(zipTree("${outputDir}/aar/${archiveName}.aar"))
+        into("${outputDir}/jar/")
+        include('classes.jar')
+        rename('classes.jar', "${archiveName}-${variant.mergedFlavor.versionName}.jar")
+    }
+//    task(signJar, type: Jar, dependsOn: taskName) {
+//
+//    }
+    String signJar = "signJar${variant.name.capitalize()}"
+    project.task(signJar, type: Jar, dependsOn: makeJar) {
+        String signName = project.name
+        String archiveName = "${signName}-${variant.name}"
+        String outputDir = "${buildDir.getPath()}/outputs"
+        from zipTree("${outputDir}/jar/${archiveName}-${variant.mergedFlavor.versionName}.jar")
+        if ('release'.equals(variant.name)) {
+            manifest {
+                attributes 'Manifest-Version': variant.mergedFlavor.versionName
+                attributes 'Author': 'lycam'
+            }
+        }
+
+    }
+    releaseJar.dependsOn tasks[signJar]
+}
