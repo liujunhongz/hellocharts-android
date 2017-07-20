@@ -344,7 +344,14 @@ public class PieChartRenderer extends AbstractChartRenderer {
         normalizeVector(sliceVector);
         final int numChars;
         if (isPercentLabel) {
-            char[] label = String.format(Locale.getDefault(), "%.2f%", 100.0f * sliceValue.getValue() / maxSum).toCharArray();
+            char[] labelAsChars = sliceValue.getLabelAsChars();
+            String formatter;
+            if (labelAsChars != null) {
+                formatter = String.valueOf(labelAsChars);
+            } else {
+                formatter = "%.2f%%";
+            }
+            char[] label = String.format(Locale.getDefault(), formatter, 100.0f * sliceValue.getValue() / maxSum).toCharArray();
             int labelLength = label.length;
             if (labelLength > labelBuffer.length) {
                 Log.w(TAG, "Label length is larger than buffer size(64chars), some chars will be skipped!");

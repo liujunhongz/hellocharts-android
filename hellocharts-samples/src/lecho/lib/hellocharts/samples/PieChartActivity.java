@@ -157,12 +157,13 @@ public class PieChartActivity extends ActionBarActivity {
             for (int i = 0; i < numValues; ++i) {
                 float value = (float) Math.random() * 30 + 15;
                 SliceValue sliceValue = new SliceValue(value, ChartUtils.pickColor());
-//                sliceValue.setLabel(value + "%");
+                sliceValue.setLabel("%.1f%%");  // 默认为%.2f%%
                 values.add(sliceValue);
             }
 
             data = new PieChartData(values);
             data.setHasLabels(hasLabels);
+            data.setPercentLabel(true); // 默认为true
             data.setHasLabelsOnlyForSelected(hasLabelForSelected);
             data.setHasLabelsOutside(hasLabelsOutside);
             data.setHasCenterCircle(hasCenterCircle);
